@@ -9,6 +9,7 @@ public class Boss1 : MonoBehaviour
     public Rigidbody2D rb2D;
 
     public Transform jugador;
+    [SerializeField] private object player;
 
     // Inicialmente mirando hacia la izquierda
     private bool mirandoIzquierda = true;

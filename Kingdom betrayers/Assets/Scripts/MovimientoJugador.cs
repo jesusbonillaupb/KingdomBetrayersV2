@@ -6,7 +6,12 @@ using UnityEngine;
 
 public class MovimientoJugador : MonoBehaviour
 {
+    [Header("Vida")]
+    [SerializeField] private float vida;
+    [SerializeField] private float maximoVida;
+    [SerializeField] private BarraDeVida barraDeVida;
     private Rigidbody2D rb2D;
+
 
     [Header("Movimiento")]
     private float inputX;
@@ -52,11 +57,35 @@ public class MovimientoJugador : MonoBehaviour
     [SerializeField] private ParticleSystem particulas;
     private void Start()
     {
+        vida = maximoVida;
+        barraDeVida.InicializarBarraDeVida(vida);
         rb2D = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         gravedadInicial = rb2D.gravityScale;
     }
+    // se le ingresa una cantidad de daño a tomar
+    public void TomarDaño(float daño)
+    {
+        vida -= daño;
+        barraDeVida.CambiarVidaActual(vida);
+        // murio xd
+        if (vida <= 0) {
+            Destroy(gameObject);
+        }
+    }
 
+    public void Curar(float curacion)
+    {   // no se cura mas pq ya esta al tope de vida
+        if ((vida + curacion) > maximoVida)
+        {
+            vida = maximoVida;
+        }
+        else
+        {
+            vida += curacion;
+            barraDeVida.CambiarVidaActual(vida);
+        }
+    }
     private void Update()
     {
         inputX = Input.GetAxisRaw("Horizontal");
@@ -176,7 +205,7 @@ public class MovimientoJugador : MonoBehaviour
     }
 
     private IEnumerator Atacar()
-{
+    {
     
     
     atacando = true;
@@ -188,7 +217,7 @@ public class MovimientoJugador : MonoBehaviour
     animator.SetBool("estaAtacando", atacando);
     
     
-}
+    }
 
 
     private void Salto()
@@ -222,4 +251,5 @@ public class MovimientoJugador : MonoBehaviour
         Gizmos.DrawWireCube(controladorSuelo.position, dimensionesCajaSuelo);
         Gizmos.DrawWireCube(controladorPared.position, dimensionesCajaPared);
     }
+
 }
