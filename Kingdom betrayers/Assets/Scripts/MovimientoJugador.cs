@@ -21,7 +21,7 @@ public class MovimientoJugador : MonoBehaviour
     private Vector3 velocidad = Vector3.zero;
     private bool mirandoDerecha = true;
     private bool dasheando = false;
-    private bool atacando = false;
+    
 
     [Header("Salto")]
     [SerializeField] private float fuerzaDeSalto;
@@ -49,12 +49,19 @@ public class MovimientoJugador : MonoBehaviour
     private float gravedadInicial;
     private bool puedeHacerDash = true;
     private bool sePuedeMover = true;
+    [Header("Ataque")]
+    private bool atacando = false;
+    [SerializeField] private Transform controladorAtaque;
+    [SerializeField] private float radioAtaque;
+    [SerializeField] private float dañoAtaque;
+    
 
     [Header("Animator")]
     private Animator animator;
 
     [Header("Particulas")]
     [SerializeField] private ParticleSystem particulas;
+
     private void Start()
     {
         vida = maximoVida;
@@ -210,8 +217,16 @@ public class MovimientoJugador : MonoBehaviour
     
     atacando = true;
     animator.SetBool("estaAtacando", atacando);
-    
-    yield return new WaitForSeconds(0.15f); 
+        Collider2D[] objetos = Physics2D.OverlapCircleAll(controladorAtaque.position, radioAtaque);
+        foreach (Collider2D collision in objetos)
+        {
+            if (collision.CompareTag("Alan"))
+            {
+                collision.GetComponent<AlanController>().TomarDaño(dañoAtaque);
+
+            }
+        }
+        yield return new WaitForSeconds(0.15f); 
     
     atacando = false;
     animator.SetBool("estaAtacando", atacando);
@@ -247,9 +262,11 @@ public class MovimientoJugador : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(controladorSuelo.position, dimensionesCajaSuelo);
-        Gizmos.DrawWireCube(controladorPared.position, dimensionesCajaPared);
+        if (controladorAtaque != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(controladorAtaque.position, radioAtaque);
+        }
     }
 
 }

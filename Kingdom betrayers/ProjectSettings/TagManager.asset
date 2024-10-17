@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Habilidad
+  - terrain
+  - Alan
   layers:
   - Default
   - TransparentFX

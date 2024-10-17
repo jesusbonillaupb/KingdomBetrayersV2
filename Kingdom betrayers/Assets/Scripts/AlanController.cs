@@ -5,14 +5,21 @@ using UnityEngine;
 public class AlanController : MonoBehaviour
 {
     public Transform player;
+    
     public float detectionRadius = 20f;
     public float speed = 3.0f;
+
+    [Header("Vida")]
+    [SerializeField] private float vida;
+    [SerializeField] private float maximoVida;
+    [SerializeField] private BarraDeVidaAlan barraDeVida;
 
     private Rigidbody2D rb;
     private Vector2 movement;
 
     private Animator animator;
     private Vector2 posicionInicial;
+    private Launcher launcher;
 
     [Header("Charge")]
     [SerializeField] private float velocidadCharge;
@@ -29,12 +36,68 @@ public class AlanController : MonoBehaviour
 
     void Start()
     {
+        vida = maximoVida;
+        barraDeVida.InicializarBarraDeVida(vida);
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         posicionInicial = new Vector2(15.85f, -1.82f);
-        StartCoroutine(ChargeCoroutine());
+        
+        launcher = GetComponent<Launcher>();
+        
+        // Inicia la coroutine que elige entre las dos acciones
+        StartCoroutine(DecidirAccion());
     }
+    public void TomarDaño(float daño)
+    {
+        vida -= daño;
+        barraDeVida.CambiarVidaActual(vida);
+        // murio xd
+        if (vida <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+    public void Curar(float curacion)
+    {   // no se cura mas pq ya esta al tope de vida
+        if ((vida + curacion) > maximoVida)
+        {
+            vida = maximoVida;
+        }
+        else
+        {
+            vida += curacion;
+            barraDeVida.CambiarVidaActual(vida);
+        }
+    }
+    private IEnumerator DecidirAccion()
+    {
+        while (true) // Repite indefinidamente
+        {
+            
+            yield return new WaitForSeconds(Random.Range(0.5f, 2f)); // Espera un tiempo aleatorio entre 2 y 5 segundos
 
+            // Elige una acción de forma aleatoria
+            if (Random.value > 0.5f) // 50% de probabilidad
+            {
+                StartCoroutine(ChargeCoroutine());
+            }
+            else
+            {
+                TirarBomba();
+                yield return new WaitForSeconds(0.5f);
+                TirarBomba();
+                yield return new WaitForSeconds(0.5f);
+                TirarBomba();
+                yield return new WaitForSeconds(0.5f);
+                TirarBomba();
+                yield return new WaitForSeconds(0.5f);
+                TirarBomba();
+                yield return new WaitForSeconds(0.5f);
+                TirarBomba();
+                
+            }
+        }
+    }
     void Update()
     {
         /*
@@ -117,4 +180,12 @@ public class AlanController : MonoBehaviour
         }
     }
 
+    private void TirarBomba() {
+        launcher = GetComponent<Launcher>();
+
+        if (launcher != null)
+        {
+            launcher.FireProjectile();
+        }
+    }
 }
