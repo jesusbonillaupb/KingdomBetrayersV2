@@ -10,7 +10,7 @@ public class AlanController : MonoBehaviour
     public float speed = 3.0f;
 
     [Header("Vida")]
-    [SerializeField] private float vida;
+    [SerializeField] public static float vida;
     [SerializeField] private float maximoVida;
     [SerializeField] private BarraDeVidaAlan barraDeVida;
 

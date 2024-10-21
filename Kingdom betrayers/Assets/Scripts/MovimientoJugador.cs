@@ -7,7 +7,7 @@ using UnityEngine;
 public class MovimientoJugador : MonoBehaviour
 {
     [Header("Vida")]
-    [SerializeField] private float vida;
+    [SerializeField] public static float vida;
     [SerializeField] private float maximoVida;
     [SerializeField] private BarraDeVida barraDeVida;
     private Rigidbody2D rb2D;
