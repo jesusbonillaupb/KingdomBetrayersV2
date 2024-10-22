@@ -51,6 +51,9 @@ public class MovimientoJugador : MonoBehaviour
     private bool sePuedeMover = true;
     [Header("Ataque")]
     private bool atacando = false;
+    [SerializeField] private float cooldownAtaque = 0.5f; // Tiempo de espera entre ataques
+    private bool puedeAtacar = true;  // Controla si el jugador puede atacar o no
+
     [SerializeField] private Transform controladorAtaque;
     [SerializeField] private float radioAtaque;
     [SerializeField] private float dañoAtaque;
@@ -213,25 +216,29 @@ public class MovimientoJugador : MonoBehaviour
 
     private IEnumerator Atacar()
     {
-    
-    
-    atacando = true;
-    animator.SetBool("estaAtacando", atacando);
+        if (!puedeAtacar) yield break; // Si no puede atacar, termina el método
+
+        puedeAtacar = false; // Bloquear ataques
+        atacando = true;
+        animator.SetBool("estaAtacando", atacando);
+
         Collider2D[] objetos = Physics2D.OverlapCircleAll(controladorAtaque.position, radioAtaque);
         foreach (Collider2D collision in objetos)
         {
             if (collision.CompareTag("Alan"))
             {
                 collision.GetComponent<AlanController>().TomarDaño(dañoAtaque);
-
             }
         }
-        yield return new WaitForSeconds(0.15f); 
-    
-    atacando = false;
-    animator.SetBool("estaAtacando", atacando);
-    
-    
+
+        yield return new WaitForSeconds(0.15f); // Duración del ataque
+
+        atacando = false;
+        animator.SetBool("estaAtacando", atacando);
+
+        yield return new WaitForSeconds(cooldownAtaque); // Cooldown del ataque
+
+        puedeAtacar = true; // Permitir que el jugador ataque de nuevo
     }
 
 
