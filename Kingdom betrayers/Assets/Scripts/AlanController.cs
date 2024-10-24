@@ -5,7 +5,7 @@ using UnityEngine;
 public class AlanController : MonoBehaviour
 {
     public Transform player;
-    
+
     public float detectionRadius = 20f;
     public float speed = 3.0f;
 
@@ -34,6 +34,9 @@ public class AlanController : MonoBehaviour
     [SerializeField] private float radioAtaque;
     [SerializeField] private float dañoAtaque;
 
+    // Nuevo rango de ataque
+    [SerializeField] private float rangoAtaque = 5f; // Rango en el que el boss puede atacar
+
     void Start()
     {
         vida = maximoVida;
@@ -41,24 +44,27 @@ public class AlanController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         posicionInicial = new Vector2(15.85f, -1.82f);
-        
+
         launcher = GetComponent<Launcher>();
-        
+
         // Inicia la coroutine que elige entre las dos acciones
         StartCoroutine(DecidirAccion());
     }
+
     public void TomarDaño(float daño)
     {
         vida -= daño;
         barraDeVida.CambiarVidaActual(vida);
-        // murio xd
+        // Murió
         if (vida <= 0)
         {
             Destroy(gameObject);
         }
     }
+
     public void Curar(float curacion)
-    {   // no se cura mas pq ya esta al tope de vida
+    {
+        // No se cura más porque ya está al tope de vida
         if ((vida + curacion) > maximoVida)
         {
             vida = maximoVida;
@@ -69,61 +75,49 @@ public class AlanController : MonoBehaviour
             barraDeVida.CambiarVidaActual(vida);
         }
     }
+
     private IEnumerator DecidirAccion()
     {
         while (true) // Repite indefinidamente
         {
-            
-            yield return new WaitForSeconds(Random.Range(0.5f, 2f)); // Espera un tiempo aleatorio entre 2 y 5 segundos
+            yield return new WaitForSeconds(2);
 
-            // Elige una acción de forma aleatoria
-            if (Random.value > 0.5f) // 50% de probabilidad
+            // Verifica la distancia al jugador
+            float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+            if (distanceToPlayer <= rangoAtaque)
             {
-                StartCoroutine(ChargeCoroutine());
-            }
-            else
-            {
-                TirarBomba();
-                yield return new WaitForSeconds(0.5f);
-                TirarBomba();
-                yield return new WaitForSeconds(0.5f);
-                TirarBomba();
-                yield return new WaitForSeconds(0.5f);
-                TirarBomba();
-                yield return new WaitForSeconds(0.5f);
-                TirarBomba();
-                yield return new WaitForSeconds(0.5f);
-                TirarBomba();
-                
+                // Elige una acción de forma aleatoria
+                if (Random.value > 0.5f) // 50% de probabilidad
+                {
+                    StartCoroutine(ChargeCoroutine());
+                }
+                else
+                {
+                    // Atacar con bombas
+                    for (int i = 0; i < 5; i++)
+                    {
+                        TirarBomba();
+                        yield return new WaitForSeconds(0.5f);
+                    }
+                }
             }
         }
     }
+
     void Update()
     {
-        /*
-        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
-        if (distanceToPlayer < detectionRadius)
-        {
-            Vector2 direction = (player.position - transform.position).normalized;
-            movement = new Vector2(direction.x, 0);
-        }
-        else {
-            movement = Vector2.zero;
-        }
-
-        rb.MovePosition(rb.position + movement * speed * Time.deltaTime); */
+        // Lógica de movimiento (opcional)
     }
 
     private IEnumerator ChargeCoroutine()
     {
-        //aca se coloca durante un tiempo una animacion de aviso
+        // Coloca durante un tiempo una animación de aviso
         preparando = true;
         animator.SetBool("preparandoCarga", preparando);
 
         yield return new WaitForSeconds(1f);
 
         preparando = false;
-
         animator.SetBool("preparandoCarga", preparando);
 
         // Calcula la dirección hacia el jugador
@@ -157,20 +151,23 @@ public class AlanController : MonoBehaviour
     {
         atacando = true;
         animator.SetBool("estaAtacando", atacando);
+
+        // Verifica si el jugador está en rango de ataque
         Collider2D[] objetos = Physics2D.OverlapCircleAll(controladorAtaque.position, radioAtaque);
         foreach (Collider2D collision in objetos)
         {
             if (collision.CompareTag("Player"))
             {
                 collision.GetComponent<MovimientoJugador>().TomarDaño(dañoAtaque);
-
             }
         }
+
         yield return new WaitForSeconds(0.15f);
 
         atacando = false;
         animator.SetBool("estaAtacando", atacando);
     }
+
     private void OnDrawGizmos()
     {
         if (controladorAtaque != null)
@@ -178,9 +175,14 @@ public class AlanController : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(controladorAtaque.position, radioAtaque);
         }
+
+        // Dibuja el rango de ataque
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, rangoAtaque);
     }
 
-    private void TirarBomba() {
+    private void TirarBomba()
+    {
         launcher = GetComponent<Launcher>();
 
         if (launcher != null)

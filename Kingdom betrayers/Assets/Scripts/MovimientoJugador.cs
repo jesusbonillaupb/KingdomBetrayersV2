@@ -229,6 +229,10 @@ public class MovimientoJugador : MonoBehaviour
             {
                 collision.GetComponent<AlanController>().TomarDaño(dañoAtaque);
             }
+            if (collision.CompareTag("Enemigo"))
+            {
+                collision.GetComponent<SPUM_Prefabs>().TomarDaño(dañoAtaque);
+            }
         }
 
         yield return new WaitForSeconds(0.15f); // Duración del ataque
